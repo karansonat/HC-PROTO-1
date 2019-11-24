@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using System;
 
 public class LevelController
 {
     #region Fields
 
+    private Transform _levelTransform;
     private readonly string LEVEL_PREFAB_PATH = "Prefabs/Levels/";
 
     #endregion //Fields
@@ -12,8 +14,8 @@ public class LevelController
 
     public void LoadLevel(int level)
     {
-        var levelInstance = GetLevelInstance(level);
-        SetLevelInstanceTransform(levelInstance.transform);
+        _levelTransform = GetLevelInstance(level).transform;
+        SetLevelInstanceTransform();
     }
 
     #endregion //Public Methods
@@ -27,12 +29,12 @@ public class LevelController
 
     private GameObject GetLevelInstance(int level)
     {
-        return Object.Instantiate(LoadLevelPrefab(level));
+        return UnityEngine.Object.Instantiate(LoadLevelPrefab(level));
     }
 
-    private void SetLevelInstanceTransform(Transform levelTransform)
+    private void SetLevelInstanceTransform()
     {
-        levelTransform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        _levelTransform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 
     #endregion //Private Methods

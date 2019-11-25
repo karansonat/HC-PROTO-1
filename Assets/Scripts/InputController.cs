@@ -11,7 +11,7 @@ public class InputController : IMonoNotification
 {
     #region Events
 
-    public static Action<SwipeAction> OnSwipeAction;
+    public static Action<SwipeAction>  SwipeAction;
 
     #endregion //Events
 
@@ -19,6 +19,7 @@ public class InputController : IMonoNotification
 
     private SwipeDetector _swipeDetector;
     private SwipeAction _swipeAction;
+    private bool _enabled;
 
     #endregion //Fields
 
@@ -28,13 +29,26 @@ public class InputController : IMonoNotification
         _swipeDetector.OnSwipe += SwipeDetector_OnSwipe;
 
         _swipeAction = new SwipeAction();
+
+        //TODO: Remove this. Input should be enabled from game controller.
+        EnableInput();
+    }
+
+    public void EnableInput()
+    {
+        _enabled = true;
+    }
+
+    public void DisableInput()
+    {
+        _enabled = false;
     }
 
     private void SwipeDetector_OnSwipe(SwipeData obj)
     {
         _swipeAction.Direction = obj.Direction;
         _swipeAction.SwipeValue = Vector2.Distance(obj.EndPosition, obj.StartPosition);
-        OnSwipeAction(_swipeAction);
+        SwipeAction(_swipeAction);
     }
 
     #region IMonoNotification Interface
@@ -49,7 +63,8 @@ public class InputController : IMonoNotification
 
     void IMonoNotification.Update()
     {
-        _swipeDetector.Update();
+        if (_enabled)
+         _swipeDetector.Update();
     }
 
     #endregion //IMonoNotification Interface

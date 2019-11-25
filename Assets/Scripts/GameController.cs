@@ -8,9 +8,8 @@ public class GameController : MonoBehaviour
     public static GameController Instance { get; private set; }
 
     private LevelController _levelController;
-    private PlayerController _playerController;
     private InputController _inputController;
-    private GameData _game;
+    public GameData GameData { get; private set; }
 
     private readonly string GAME_DATA_PATH = "GameData/TestGameData";
 
@@ -20,6 +19,8 @@ public class GameController : MonoBehaviour
 
     private void Awake()
     {
+        Application.targetFrameRate = 60;
+
         #region Singleton
 
         if (Instance == null)
@@ -38,13 +39,11 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        Init();   
+        Init();
     }
 
     private void FixedUpdate()
     {
-        if (_playerController != null)
-            (_playerController as IMonoNotification).FixedUpdate();
     }
 
     private void Update()
@@ -60,33 +59,52 @@ public class GameController : MonoBehaviour
     private void Init()
     {
         LoadGameData();
-        InitializeInputController();
-        InitializeLevelController();
-        InitializePlayerController();
-        CameraController.Instance.Init();
+        CreateControllers();
+        InitializeControllers();
+        SubscribeEvents();
     }
 
-    private void InitializeLevelController()
+    private void SubscribeEvents()
     {
-        _levelController = new LevelController();
-        _levelController.LoadLevel(_game.Level);
-    }
-
-    private void InitializeInputController()
-    {
-        _inputController = new InputController();
-        _inputController.Init();
-    }
-
-    private void InitializePlayerController()
-    {
-        _playerController = new PlayerController();
-        _playerController.Init(_game.AvatarName);
+        LevelController.LevelPartPassed += OnLevelPartPassed;
+        LevelController.TransitionAnimationCompleted += OnLevelTransitionCompleted;
+        LevelController.LevelPassed += OnLevelPassed;
     }
 
     private void LoadGameData()
     {
-        _game = Resources.Load<GameData>(GAME_DATA_PATH);
+        GameData = Resources.Load<GameData>(GAME_DATA_PATH);
+    }
+
+    private void CreateControllers()
+    {
+        _levelController = new LevelController();
+        _inputController = new InputController();
+    }
+
+    private void InitializeControllers()
+    {
+        //TODO: Level Controller also need Init() func.
+        _levelController.LoadLevel(GameData.Level);
+        _inputController.Init();
+        PlayerController.Instance.Init();
+        CameraController.Instance.Init();
+    }
+
+    private void OnLevelPartPassed()
+    {
+        _inputController.DisableInput();
+        //_playerController.Disable();
+    }
+
+    private void OnLevelTransitionCompleted()
+    {
+        _inputController.EnableInput();
+        //_playerController.Reset();
+    }
+
+    private void OnLevelPassed()
+    {
     }
 
     #endregion //Private Methods

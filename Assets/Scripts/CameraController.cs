@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using DG.Tweening;
 
 public class CameraController : MonoBehaviour
 {
@@ -7,7 +8,8 @@ public class CameraController : MonoBehaviour
 
     private float _speed = 5f;
     public static Action<float> OnCameraRotationChange;
-    private const int ROTATION_LIMIT = 25;
+    public static readonly int ROTATION_LIMIT = 25;
+    private const int ROTATION360_DURATION = 1;
 
     #region Unity Methods
 
@@ -29,11 +31,20 @@ public class CameraController : MonoBehaviour
         #endregion
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Rotate360WithEase();
+        }
+    }
+
     #endregion //Unity Methods
 
     public void Init()
     {
-        InputController.OnSwipeAction += Rotate;
+        InputController.SwipeAction += Rotate;
+        LevelController.LevelPartPassed += Rotate360WithEase;
     }
 
     public void Rotate(SwipeAction swipeAction)
@@ -48,15 +59,27 @@ public class CameraController : MonoBehaviour
 
         if (angles.y > ROTATION_LIMIT)
         {
-            angles.y = 25;
+            angles.y = ROTATION_LIMIT;
             transform.eulerAngles = angles;
         }
         else if (angles.y < -ROTATION_LIMIT)
         {
-            angles.y = -25;
+            angles.y = -ROTATION_LIMIT;
             transform.eulerAngles = angles;
         }
 
         OnCameraRotationChange.Invoke(angles.y);
+    }
+
+    private void Rotate360WithEase()
+    {
+        var angle = transform.eulerAngles.y;
+
+        if (angle > 300f)
+            angle -= 360;
+
+        transform.DORotate(new Vector3(0, 360 - angle, 0), ROTATION360_DURATION, RotateMode.FastBeyond360)
+            .SetEase(Ease.InCirc)
+            .SetRelative();
     }
 }

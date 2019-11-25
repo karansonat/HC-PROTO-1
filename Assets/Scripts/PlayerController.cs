@@ -1,68 +1,66 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using Lean.Pool;
 
-public class PlayerController : IMonoNotification
+public class PlayerController
 {
     #region Fields
+    #region Singleton
 
-    private Transform _playerTransform;
-    private Rigidbody _rigidbody;
+    private static PlayerController _instance = new PlayerController();
+    public static PlayerController Instance
+    {
+        get { return _instance; }
+    }
 
-    private float _levelAngle;
+    static PlayerController()
+    {
+    }
+
+    private PlayerController()
+    {
+    }
+
+    #endregion
+
+    private LeanGameObjectPool _pool;
 
     private readonly string PLAYER_PREFAB_PATH = "Prefabs/Avatars/";
-    private readonly Vector3 INITIAL_TRANSFORM = new Vector3(0, 8.75f, 0);
-    private readonly float MAX_VELOCITY = 5f;
+    private readonly Vector3 INITIAL_POSITION = new Vector3(0, 8.75f, 0);
 
     #endregion //Fields
 
-    public void Init(string avatarName)
+    public void Init()
     {
-        CameraController.OnCameraRotationChange += OnLevelRotationChanged;
+        InitializePool();
+        SpawnPlayerControlledObject(INITIAL_POSITION);
+    }
 
-        _playerTransform = GetPlayerInstance(avatarName).transform;
-        _rigidbody = _playerTransform.GetComponent<Rigidbody>();
-        _playerTransform.SetPositionAndRotation(INITIAL_TRANSFORM, Quaternion.identity);
+    public GameObject SpawnPlayerControlledObject(Vector3 position, Transform parent = null, bool worldPositionStays = true)
+    {
+        return _pool.Spawn(position, Quaternion.identity, parent, worldPositionStays);
+    }
+
+    public void Despawn(GameObject go)
+    {
+        _pool.Despawn(go);
     }
 
     #region Private Methods
 
-    private GameObject LoadPlayerPrefab(string avatarName)
+    private void InitializePool()
     {
-        return Resources.Load<GameObject>(PLAYER_PREFAB_PATH + avatarName);
+        _pool = new GameObject("Pool").AddComponent<LeanGameObjectPool>();
+        _pool.Prefab = GetPlayerControlledObjectPrefab();
+        _pool.Preload = 200;
+        _pool.PreloadAll();
     }
 
-    private GameObject GetPlayerInstance(string avatarName)
+    private GameObject GetPlayerControlledObjectPrefab()
     {
-        return UnityEngine.Object.Instantiate(LoadPlayerPrefab(avatarName));
+        var prefabPath = PLAYER_PREFAB_PATH + GameController.Instance.GameData.AvatarName;
+        return Resources.Load<GameObject>(prefabPath);
     }
 
-    private void UpdateVelocity()
-    {
-        var velocity = Vector3.right * (_levelAngle / 25f) * MAX_VELOCITY;
-        velocity.y = _rigidbody.velocity.y;
-        _rigidbody.velocity = velocity;
-    }
-
-    private void OnLevelRotationChanged(float angle)
-    {
-        _levelAngle = angle;
-    }
-
-    void IMonoNotification.FixedUpdate()
-    {
-        UpdateVelocity();
-    }
-
-    void IMonoNotification.Update()
-    {
-        throw new NotImplementedException();
-    }
-
-    void IMonoNotification.LateUpdate()
-    {
-        throw new NotImplementedException();
-    }
 
     #endregion //Private Methods
 }

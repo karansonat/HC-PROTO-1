@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6740573901342966206}
   - component: {fileID: 2623473512974531395}
   - component: {fileID: 9204023870323766595}
-  - component: {fileID: 2922853492539088713}
   m_Layer: 9
   m_Name: Level End Gate
   m_TagString: LevelEndGate
@@ -93,16 +92,3 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.0000001, y: 2, z: 0.4}
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!114 &2922853492539088713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4282778953109687213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 770e6dbf4985843dea4bad756287dbbf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _elementType: 1

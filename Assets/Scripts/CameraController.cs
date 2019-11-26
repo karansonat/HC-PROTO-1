@@ -6,10 +6,13 @@ public class CameraController : MonoBehaviour
 {
     public static CameraController Instance { get; private set; }
 
-    private float _speed = 5f;
+    private float _speed = 20f;
     public static Action<float> OnCameraRotationChange;
     public static readonly int ROTATION_LIMIT = 25;
     private const int ROTATION360_DURATION = 1;
+    private Vector3 _targetAngles;
+    private float _followTime = 0.2f;
+    private float _step = 0f;
 
     #region Unity Methods
 
@@ -30,45 +33,53 @@ public class CameraController : MonoBehaviour
 
         #endregion
     }
-
-    private void Update()
+    /*
+    private void LateUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!transform.eulerAngles.Equals(_targetAngles))
         {
-            Rotate360WithEase();
+            _step += Time.deltaTime;
+            transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, _targetAngles, _step/_followTime);
         }
     }
-
+    */
     #endregion //Unity Methods
 
     public void Init()
     {
         InputController.SwipeAction += Rotate;
-        LevelController.LevelPartPassed += Rotate360WithEase;
     }
 
     public void Rotate(SwipeAction swipeAction)
     {
         int multiplier = swipeAction.Direction == SwipeDirection.Left ? -1 : 1;
-        transform.rotation *= Quaternion.AngleAxis(swipeAction.SwipeValue * multiplier * _speed * Time.deltaTime, transform.up);
+        var targetRot = transform.rotation * Quaternion.AngleAxis(swipeAction.SwipeValue * multiplier * _speed * Time.deltaTime, transform.up);
 
-        var angles = transform.eulerAngles;
+        _targetAngles = targetRot.eulerAngles;
         //HACK: Dirty solution
-        if (angles.y > 300f)
-            angles.y = angles.y - 360;
+        if (_targetAngles.y > 300f)
+            _targetAngles.y = _targetAngles.y - 360;
 
-        if (angles.y > ROTATION_LIMIT)
+        if (_targetAngles.y > ROTATION_LIMIT)
         {
-            angles.y = ROTATION_LIMIT;
-            transform.eulerAngles = angles;
+            _targetAngles.y = ROTATION_LIMIT;
+            transform.eulerAngles = _targetAngles;
         }
-        else if (angles.y < -ROTATION_LIMIT)
+        else if (_targetAngles.y < -ROTATION_LIMIT)
         {
-            angles.y = -ROTATION_LIMIT;
-            transform.eulerAngles = angles;
+            _targetAngles.y = -ROTATION_LIMIT;
+            transform.eulerAngles = _targetAngles;
         }
 
-        OnCameraRotationChange.Invoke(angles.y);
+        transform.DOKill();
+        transform.DORotate(_targetAngles, 0.1f);
+
+        OnCameraRotationChange.Invoke(_targetAngles.y);
+    }
+
+    public void MoveToNextPart()
+    {
+        Rotate360WithEase();
     }
 
     private void Rotate360WithEase()

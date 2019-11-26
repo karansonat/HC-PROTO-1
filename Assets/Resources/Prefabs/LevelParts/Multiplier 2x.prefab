@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 294592390416464464}
   - component: {fileID: 5067709201110236630}
   - component: {fileID: -2801455220521601237}
-  - component: {fileID: 2502608428047178982}
+  - component: {fileID: 2390810510977491291}
   m_Layer: 9
   m_Name: Multiplier 2x
   m_TagString: Untagged
@@ -95,8 +95,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _multiplier: 2
---- !u!136 &2502608428047178982
-CapsuleCollider:
+--- !u!65 &2390810510977491291
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -105,10 +105,9 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7460871472403664664
 GameObject:
   m_ObjectHideFlags: 0

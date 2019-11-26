@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
@@ -54,6 +53,11 @@ public class GameController : MonoBehaviour
 
     #endregion //Unity Methods
 
+    public void IncreaseCoinsByAmount(int amount)
+    {
+        GameData.Coins += amount;
+    }
+
     #region Private Methods
 
     private void Init()
@@ -66,9 +70,37 @@ public class GameController : MonoBehaviour
 
     private void SubscribeEvents()
     {
-        LevelController.LevelPartPassed += OnLevelPartPassed;
         LevelController.TransitionAnimationCompleted += OnLevelTransitionCompleted;
         LevelController.LevelPassed += OnLevelPassed;
+
+        PlayerController.Instance.NoMorePlayerControlledObject += OnNoMorePlayerControlledObject;
+    }
+
+    private void OnNoMorePlayerControlledObject()
+    {
+        switch (CheckGameEndConditions())
+        {
+            case GameState.LevelPartPassed:
+                OnLevelPartPassed();
+                break;
+            case GameState.LevelPassed:
+                OnLevelPassed();
+                break;
+            case GameState.GameOver:
+                Debug.Log("GameOver");
+                break;
+        }
+    }
+
+    private GameState CheckGameEndConditions()
+    {
+        if (_levelController.IsLevelEndBucketActive)
+            return GameState.LevelPassed;
+
+        if (_levelController.IsLevelPartBucketActive)
+            return GameState.LevelPartPassed;
+
+            return GameState.GameOver;
     }
 
     private void LoadGameData()
@@ -94,17 +126,19 @@ public class GameController : MonoBehaviour
     private void OnLevelPartPassed()
     {
         _inputController.DisableInput();
-        //_playerController.Disable();
+        _levelController.MoveToNextPart();
+        CameraController.Instance.MoveToNextPart();
     }
 
     private void OnLevelTransitionCompleted()
     {
         _inputController.EnableInput();
-        //_playerController.Reset();
+        PlayerController.Instance.SetUpInitialPlayer();
     }
 
     private void OnLevelPassed()
     {
+        Debug.Log("Level Passed");
     }
 
     #endregion //Private Methods

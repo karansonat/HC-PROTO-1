@@ -9,11 +9,12 @@ public class LevelController
     private Transform _levelTransform;
     private readonly string LEVEL_PREFAB_PATH = "Prefabs/Levels/";
     private const int DISTANCE_BETWEEN_PARTS = 30;
+    public bool IsLevelPartBucketActive { get; private set; }
+    public bool IsLevelEndBucketActive { get; private set; }
 
     private readonly string TAG_LEVEL_PART_GATE = "LevelPartGate";
     private readonly string TAG_LEVEL_END_GATE = "LevelEndGate";
 
-    public static Action LevelPartPassed;
     public static Action TransitionAnimationCompleted;
     public static Action LevelPassed;
     public static Action<int> MultiplierActivated;
@@ -24,9 +25,26 @@ public class LevelController
 
     public void LoadLevel(int level)
     {
+        IsLevelPartBucketActive = false;
+        IsLevelEndBucketActive = false;
         _levelTransform = GetLevelInstance(level).transform;
         SetLevelInstanceTransform();
         AttachLevelEvents();
+    }
+
+    public void MoveToNextPart()
+    {
+        _levelTransform.DOMoveY(_levelTransform.position.y + DISTANCE_BETWEEN_PARTS, 1f)
+            .SetEase(Ease.InCirc)
+            .onComplete += OnTransitionAnimationCompleted;
+
+        ResetFlags();
+    }
+
+    private void ResetFlags()
+    {
+        IsLevelPartBucketActive = false;
+        IsLevelEndBucketActive = false;
     }
 
     #endregion //Public Methods
@@ -50,37 +68,13 @@ public class LevelController
 
     private void AttachLevelEvents()
     {
-        foreach (var handler in _levelTransform.GetComponentsInChildren<OnTriggerEnterHandler>(true))
-            handler.GetComponent<OnTriggerEnterHandler>().Attach(OnTriggerEntered);
-    }
-
-    private void OnTriggerEntered(Collider other, LevelElement elementType)
-    {
-        switch (elementType)
-        {
-            case LevelElement.LevelPartGate:
-                //OnLevelPartPassed();
-                break;
-            case LevelElement.LevelEndGate:
-                //OnLevelPassed();
-                break;
-            case LevelElement.Multiplier2x:
-                break;
-            case LevelElement.Multiplier5x:
-                break;
-            case LevelElement.Multipliet10x:
-                break;
-            case LevelElement.Multiplier100x:
-                break;
-            case LevelElement.Multiplier200x:
-                break;
-        }
+        foreach (var bucket in _levelTransform.GetComponentsInChildren<LevelPartBucket>(true))
+            bucket.LevelPartBucketActivated += OnLevelPartPassed;
     }
 
     private void OnLevelPartPassed()
     {
-        LevelPartPassed.Invoke();
-        MoveToNextPart();
+        IsLevelPartBucketActive = true;
     }
 
     private void OnLevelPassed()
@@ -98,13 +92,6 @@ public class LevelController
     private void UnloadLevel()
     {
         throw new NotImplementedException();
-    }
-
-    private void MoveToNextPart()
-    {
-        _levelTransform.DOMoveY(_levelTransform.position.y + DISTANCE_BETWEEN_PARTS, 1f)
-            .SetEase(Ease.InCirc)
-            .onComplete += OnTransitionAnimationCompleted;
     }
 
     #endregion //Private Methods

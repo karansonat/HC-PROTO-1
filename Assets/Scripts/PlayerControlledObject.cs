@@ -24,6 +24,12 @@ public class PlayerControlledObject : MonoBehaviour
         UpdateVelocity();
     }
 
+    private void OnDisable()
+    {
+        if (_rigidbody != null)
+            _rigidbody.velocity = Vector3.zero;
+    }
+
     #endregion
 
     #region Private Methods

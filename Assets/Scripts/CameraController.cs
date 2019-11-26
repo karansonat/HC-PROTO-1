@@ -4,6 +4,8 @@ using DG.Tweening;
 
 public class CameraController : MonoBehaviour
 {
+    #region Fields
+
     public static CameraController Instance { get; private set; }
 
     private float _speed = 20f;
@@ -11,8 +13,8 @@ public class CameraController : MonoBehaviour
     public static readonly int ROTATION_LIMIT = 25;
     private const int ROTATION360_DURATION = 1;
     private Vector3 _targetAngles;
-    private float _followTime = 0.2f;
-    private float _step = 0f;
+
+    #endregion //Fields
 
     #region Unity Methods
 
@@ -29,21 +31,12 @@ public class CameraController : MonoBehaviour
             Destroy(gameObject);
         }
 
-        DontDestroyOnLoad(gameObject);
-
         #endregion
     }
-    /*
-    private void LateUpdate()
-    {
-        if (!transform.eulerAngles.Equals(_targetAngles))
-        {
-            _step += Time.deltaTime;
-            transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, _targetAngles, _step/_followTime);
-        }
-    }
-    */
+
     #endregion //Unity Methods
+
+    #region Public Methods
 
     public void Init()
     {
@@ -82,6 +75,15 @@ public class CameraController : MonoBehaviour
         Rotate360WithEase();
     }
 
+    public void Reset()
+    {
+        transform.eulerAngles = Vector3.zero;
+    }
+
+    #endregion //Public Methods
+
+    #region Private Methods
+
     private void Rotate360WithEase()
     {
         var angle = transform.eulerAngles.y;
@@ -93,4 +95,6 @@ public class CameraController : MonoBehaviour
             .SetEase(Ease.InCirc)
             .SetRelative();
     }
+
+    #endregion //Private Methods
 }

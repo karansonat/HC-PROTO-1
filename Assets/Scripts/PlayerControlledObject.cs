@@ -7,7 +7,7 @@ public class PlayerControlledObject : MonoBehaviour
     private Rigidbody _rigidbody;
     private float _cameraAngle;
 
-    private readonly float MAX_VELOCITY = 15f;
+    private readonly float MAX_VELOCITY = 130f;
 
     #endregion
 
@@ -27,7 +27,12 @@ public class PlayerControlledObject : MonoBehaviour
     private void OnDisable()
     {
         if (_rigidbody != null)
+        {
             _rigidbody.velocity = Vector3.zero;
+            _rigidbody.angularVelocity = Vector3.zero;
+        }
+
+        _cameraAngle = 0;
     }
 
     #endregion
@@ -36,9 +41,7 @@ public class PlayerControlledObject : MonoBehaviour
 
     private void UpdateVelocity()
     {
-        var velocity = Vector3.right * (_cameraAngle / CameraController.ROTATION_LIMIT) * MAX_VELOCITY;
-        velocity.y = _rigidbody.velocity.y;
-        _rigidbody.velocity = velocity;
+        _rigidbody.AddForce(Vector3.right * (_cameraAngle / CameraController.ROTATION_LIMIT) * MAX_VELOCITY, ForceMode.Force);
     }
 
     private void OnCameraRotationChanged(float angle)

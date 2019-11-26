@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -31,8 +33,6 @@ public class GameController : MonoBehaviour
             Destroy(gameObject);
         }
 
-        DontDestroyOnLoad(gameObject);
-
         #endregion
     }
 
@@ -56,6 +56,7 @@ public class GameController : MonoBehaviour
     public void IncreaseCoinsByAmount(int amount)
     {
         GameData.Coins += amount;
+        UIController.Instance.UpdateScore();
     }
 
     #region Private Methods
@@ -74,6 +75,23 @@ public class GameController : MonoBehaviour
         LevelController.LevelPassed += OnLevelPassed;
 
         PlayerController.Instance.NoMorePlayerControlledObject += OnNoMorePlayerControlledObject;
+
+        UIController.Instance.PlayButtonPressed += OnPlayButtonPressed;
+        UIController.Instance.RestartButtonPressed += OnRestartButtonPressed;
+
+    }
+
+    private void OnRestartButtonPressed()
+    {
+        UIController.Instance.ShowHowToPlayScreen();
+        CameraController.Instance.Reset();
+        _levelController.LoadLevel(GameData.Level);
+        PlayerController.Instance.SetUpInitialPlayer();
+    }
+
+    private void OnPlayButtonPressed()
+    {
+        _inputController.EnableInput();
     }
 
     private void OnNoMorePlayerControlledObject()
@@ -87,9 +105,15 @@ public class GameController : MonoBehaviour
                 OnLevelPassed();
                 break;
             case GameState.GameOver:
-                Debug.Log("GameOver");
+                OnGameOver();
                 break;
         }
+    }
+
+    private void OnGameOver()
+    {
+        UIController.Instance.ShowEndGameScreen();
+        _inputController.DisableInput();
     }
 
     private GameState CheckGameEndConditions()
@@ -121,6 +145,7 @@ public class GameController : MonoBehaviour
         _inputController.Init();
         PlayerController.Instance.Init();
         CameraController.Instance.Init();
+        UIController.Instance.Init();
     }
 
     private void OnLevelPartPassed()
@@ -138,7 +163,7 @@ public class GameController : MonoBehaviour
 
     private void OnLevelPassed()
     {
-        Debug.Log("Level Passed");
+        UIController.Instance.ShowEndGameScreen(true);
     }
 
     #endregion //Private Methods

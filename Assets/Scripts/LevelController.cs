@@ -25,6 +25,8 @@ public class LevelController
 
     public void LoadLevel(int level)
     {
+        UnloadLevel();
+
         IsLevelPartBucketActive = false;
         IsLevelEndBucketActive = false;
         _levelTransform = GetLevelInstance(level).transform;
@@ -41,15 +43,24 @@ public class LevelController
         ResetFlags();
     }
 
+    #endregion //Public Methods
+
+    #region Private Methods
+
+    private void UnloadLevel()
+    {
+        if (_levelTransform != null)
+        {
+            UnityEngine.Object.Destroy(_levelTransform.gameObject);
+            _levelTransform = null;
+        }
+    }
+
     private void ResetFlags()
     {
         IsLevelPartBucketActive = false;
         IsLevelEndBucketActive = false;
     }
-
-    #endregion //Public Methods
-
-    #region Private Methods
 
     private GameObject LoadLevelPrefab(int level)
     {
@@ -68,30 +79,31 @@ public class LevelController
 
     private void AttachLevelEvents()
     {
-        foreach (var bucket in _levelTransform.GetComponentsInChildren<LevelPartBucket>(true))
-            bucket.LevelPartBucketActivated += OnLevelPartPassed;
+        foreach (var bucket in _levelTransform.GetComponentsInChildren<Bucket>(true))
+            bucket.BucketActivated += BucketActivated;
     }
 
-    private void OnLevelPartPassed()
+    private void BucketActivated(BucketType type)
     {
-        IsLevelPartBucketActive = true;
+        if (type == BucketType.LevelPart)
+        {
+            IsLevelPartBucketActive = true;
+        }
+        else if (type == BucketType.LevelEnd)
+        {
+            IsLevelEndBucketActive = true;
+        }
     }
 
     private void OnLevelPassed()
     {
         Debug.Log("Level passed!");
         LevelPassed.Invoke();
-        UnloadLevel();
     }
 
     private void OnTransitionAnimationCompleted()
     {
         TransitionAnimationCompleted.Invoke();
-    }
-
-    private void UnloadLevel()
-    {
-        throw new NotImplementedException();
     }
 
     #endregion //Private Methods

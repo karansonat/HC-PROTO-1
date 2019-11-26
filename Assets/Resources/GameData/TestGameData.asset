@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: TestGameData
   m_EditorClassIdentifier: 
   Level: 1
-  Coins: 50
+  Coins: 0
   NoAds: 0
   AvatarName: ball_1
